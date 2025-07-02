@@ -6,7 +6,7 @@ const ProfilePage = async () => {
     return (
         <>
             <div className="flex flex-col gap-1.5">
-                <h3>آخرین پست‌ها</h3>
+                <h3>اطلاعات کلی</h3>
                 <Suspense fallback={<p>در حال بارگذاری اطلاعات...</p>}>
                     <CardsWrapper />
                 </Suspense>

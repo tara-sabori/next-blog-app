@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" className="ligth-mode">
       <body className={`${vazirFont.variable} font-sans min-h-screen`}>
         <AuthProvider>
           <Toaster />
