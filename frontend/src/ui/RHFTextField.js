@@ -13,7 +13,7 @@ export default function RHFTextField({
   const hasError = (errors && errorMessages);
   return (
     <div
-      className={`textField relative`}
+      className={`textField`}
     >
       <label htmlFor={name} className="mb-2 block text-secondary-700">
         {label}
