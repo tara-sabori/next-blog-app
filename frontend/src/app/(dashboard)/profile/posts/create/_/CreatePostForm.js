@@ -38,16 +38,40 @@ const schema = yup
     })
     .required();
 
-const CreatePostForm = () => {
+const CreatePostForm = ({ post }) => {
+    const {
+        title,
+        text,
+        slug,
+        briefText,
+        readingTime,
+        category,
+        coverImage,
+        coverImageUrl: prevCoverImage
+    } = post;
+    let editPostValue = {};
+    if (post?._id) {
+        editPostValue = {
+            title,
+            text,
+            slug,
+            briefText,
+            readingTime,
+            category: category?._id,
+            coverImage,
+        }
+    }
     const { register, formState: { errors }, handleSubmit, reset, control, setValue } = useForm(
         {
             mode: 'onTouched',
-            resolver: yupResolver(schema)
+            resolver: yupResolver(schema),
+            defaultValues: editPostValue
         }
     );
     const [categories, setCategories] = useState([]);
-    const router=useRouter();
-    
+    const [loadingCat,setLoadingCat]=useState(true);
+    const router = useRouter();
+
     useEffect(() => {
         const getData = async () => {
             try {
@@ -57,11 +81,13 @@ const CreatePostForm = () => {
             } catch (error) {
                 setCategories([])
                 console.log(error);
+            }finally{
+                setLoadingCat(false);
             }
         }
         getData();
     }, [])
-    const [coverImageUrl, setCoverImageUrl] = useState(null);
+    const [coverImageUrl, setCoverImageUrl] = useState(prevCoverImage || null);
 
     const onSubmit = async (data) => {
         const formData = new FormData();
@@ -118,14 +144,14 @@ const CreatePostForm = () => {
                 register={register}
                 isRequired
             />
-            <RHFSelect
+            {loadingCat?<span>در حال بارگذاری</span>:<RHFSelect
                 name="category"
                 label="دسته بندی"
                 errors={errors}
                 register={register}
                 isRequired
                 options={categories}
-            />
+            />}
             <Controller
                 name="coverImage"
                 control={control}

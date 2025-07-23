@@ -1,4 +1,3 @@
-import { data } from "autoprefixer"
 import API from "./API"
 
 export const getAllUserApi = async (options) => {
