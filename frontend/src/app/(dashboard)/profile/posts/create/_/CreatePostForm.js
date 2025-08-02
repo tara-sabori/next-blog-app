@@ -10,8 +10,9 @@ import Image from 'next/image';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import FileInput from '@/ui/FileInput';
 import toast from 'react-hot-toast';
-import { createPostApi } from '@/services/postService';
+import { createPostApi, editPostApi } from '@/services/postService';
 import { useRouter } from 'next/navigation';
+import { imageUrlToFile } from '@/utils/fileFormatter';
 
 const schema = yup
     .object({
@@ -38,7 +39,8 @@ const schema = yup
     })
     .required();
 
-const CreatePostForm = ({ post }) => {
+const CreatePostForm = ({ post = {} }) => {
+    const { _id: editId } = post;
     const {
         title,
         text,
@@ -47,7 +49,7 @@ const CreatePostForm = ({ post }) => {
         readingTime,
         category,
         coverImage,
-        coverImageUrl: prevCoverImage
+        coverImageUrl: prevCoverImageUrl
     } = post;
     let editPostValue = {};
     if (post?._id) {
@@ -57,7 +59,7 @@ const CreatePostForm = ({ post }) => {
             slug,
             briefText,
             readingTime,
-            category: category?._id,
+            category: category._id,
             coverImage,
         }
     }
@@ -69,7 +71,7 @@ const CreatePostForm = ({ post }) => {
         }
     );
     const [categories, setCategories] = useState([]);
-    const [loadingCat,setLoadingCat]=useState(true);
+    const [loadingCat, setLoadingCat] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
@@ -81,14 +83,25 @@ const CreatePostForm = ({ post }) => {
             } catch (error) {
                 setCategories([])
                 console.log(error);
-            }finally{
+            } finally {
                 setLoadingCat(false);
             }
         }
         getData();
     }, [])
-    const [coverImageUrl, setCoverImageUrl] = useState(prevCoverImage || null);
+    const [coverImageUrl, setCoverImageUrl] = useState(prevCoverImageUrl || null);
+    useEffect(() => {
+        if (prevCoverImageUrl) {
+            // convert preve link to file
+            async function fetchMyApi() {
+                const file = await imageUrlToFile(prevCoverImageUrl);
+                setValue("coverImage", file);
+            }
+            fetchMyApi();
+        }
+    }, [editId, prevCoverImageUrl, setValue]);
 
+    // console.log(editPostValue);
     const onSubmit = async (data) => {
         const formData = new FormData();
 
@@ -97,8 +110,13 @@ const CreatePostForm = ({ post }) => {
         }
 
         try {
-            const data = await createPostApi(formData);
-            toast.success('باموفقیت ایجاد شد.')
+            if (editId) {
+                const data = await editPostApi(formData, editId);
+            }
+            else {
+                const data = await createPostApi(formData);
+            }
+            toast.success(editId?'یاموفقیت ویرایش شد.':'باموفقیت ایجاد شد.')
             router.push('/profile/posts')
         } catch (error) {
             console.log(error);
@@ -144,7 +162,7 @@ const CreatePostForm = ({ post }) => {
                 register={register}
                 isRequired
             />
-            {loadingCat?<span>در حال بارگذاری</span>:<RHFSelect
+            {loadingCat ? <span>در حال بارگذاری</span> : <RHFSelect
                 name="category"
                 label="دسته بندی"
                 errors={errors}
@@ -196,7 +214,9 @@ const CreatePostForm = ({ post }) => {
                 </div>
             }
             <button type='submit' className='bg-primary-900 text-secondary-100 p-1.5 rounded-lg'>
-                تایید
+                {
+                    editId ? 'ویرایش' : 'تایید'
+                }
             </button>
         </form>
     );

@@ -26,7 +26,8 @@ export default function Search() {
     };
 
     return (
-        <form className="relative" onSubmit={formSubmit}>
+        <form onSubmit={formSubmit}>
+            <div className="relative z-10">
             <input
                 type="text"
                 name="search"
@@ -41,6 +42,7 @@ export default function Search() {
             >
                 <MagnifyingGlassIcon className="h-4 text-secondary-400" />
             </button>
+            </div>
         </form>
     );
 }
